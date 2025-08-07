@@ -30,21 +30,21 @@ const LoginUser = async (req, res) => {
  
     console.log("login user");
     
-    const { name, password } = req.body;
+    const { name, password} = req.body;
 
     const finduser =  await users.findOne({name:name})
     if(finduser){
      console.log("finduser",finduser);
      
      if(bcrypt.compareSync(password, finduser.password)){
-        console.log("good password");
-        var token = jwt.sign({ user:name }, 'shhhhh');
+        var token = jwt.sign({ user:name, role:finduser.role}, 'shhhhh');
+        console.log("good password",token,"role",finduser.role);
      }else{
         console.log("bad password");
      }
 
     }
-  return res.status(200).json({ message: "Connexion réussie", token: token });
+  return res.status(200).json({ message: "Connexion réussie", token:token,role:finduser.role });
 }
 
 module.exports = {
