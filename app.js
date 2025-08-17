@@ -17,6 +17,8 @@ const isProd = process.env.NODE_ENV === 'production';
 connectDB();
 
 const userRouter = require('./routes/user');
+const  Navmenu = require('./routes/NavMenu')
+
 
 app.use(logger('dev'));
 app.use(cors());
@@ -24,7 +26,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-  app.use('/user', userRouter);
+  
+app.use('/user', userRouter);
+app.use("/navmenu",Navmenu);
+
 if (!isProd) {
   console.log("mode dev");
 
