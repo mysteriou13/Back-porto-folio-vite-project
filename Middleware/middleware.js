@@ -1,26 +1,33 @@
+require('dotenv').config(); // Charger les variables d'environnement
 const jwt = require('jsonwebtoken');
 
-const  authMiddleware = (req, res, next) =>{
-    
+const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-   console.log("auth login",authHeader);
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Token manquant ou invalide' });
+  if (!authHeader) {
+    return res.status(403).json({ message: 'Token manquant' });
   }
 
-  const token = authHeader;
+  const token = authHeader.split(' ')[1]; // extraire le JWT
+  if (!token) {
+    return res.status(403).json({ message: 'Token invalide' });
+  }
 
   try {
+    // ⚠️ Vérifier que process.env.JWT_SECRET est défini
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET non défini dans les variables d’environnement');
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Stocker les infos décodées dans req.user
-    next(); // Passer au prochain middleware ou contrôleur
+    req.user = decoded;
+    next();
   } catch (error) {
+    console.log("error token",error);
     return res.status(403).json({ message: 'Token invalide ou expiré' });
   }
-}
+};
 
 module.exports = {
-   authMiddleware
-}
+  authMiddleware,
+};

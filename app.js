@@ -5,7 +5,6 @@ const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 const { connectDB } = require("./Connect");
 
 dotenv.config();
@@ -18,7 +17,7 @@ connectDB();
 
 const userRouter = require('./routes/user');
 const  Navmenu = require('./routes/NavMenu')
-
+ const Contact = require("./routes/Contact")
 
 app.use(logger('dev'));
 app.use(cors());
@@ -29,44 +28,27 @@ app.use(express.static(path.join(__dirname, 'public')));
   
 app.use('/user', userRouter);
 app.use("/navmenu",Navmenu);
+app.use("/contact",Contact)
 
-if (!isProd) {
-  console.log("mode dev");
-
-  // API backend
-
-
-  // Proxy frontend vers Vite
-  app.use(
-    '/',
-    createProxyMiddleware({
-      target: 'http://localhost:5173',
-      changeOrigin: true,
-    })
-  );
-
-} else {
+if (isProd) {
   console.log("mode prod");
-
-  // API backend
-
 
   // Fichiers statiques de Vite
   app.use(express.static(path.join(__dirname, 'dist')));
 
   // Fallback SPA
-  app.get('*', (req, res) => {
+  app.get('*', ( res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 }
 
 // catch 404 and forward to error handler
-app.use((req, res, next) => {
+app.use((next) => {
   next(createError(404));
 });
 
 // error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   res.status(err.status || 500);

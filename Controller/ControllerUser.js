@@ -3,6 +3,7 @@ var jwt = require('jsonwebtoken');
 const {users} = require("../Model/ModelUser")
 
 const bcrypt = require('bcrypt');
+
 /*add user*/
 const InscriptionUser = async (req, res) => {
    console.log("inscription user");
@@ -27,24 +28,24 @@ const InscriptionUser = async (req, res) => {
 
 /*connection user*/
 const LoginUser = async (req, res) => {
- 
-    console.log("login user");
-    
-    const { name, password} = req.body;
-
-    const finduser =  await users.findOne({name:name})
-    if(finduser){
-     console.log("finduser",finduser);
      
+    const { name, password} = req.body;
+    console.log("body user",req.body);
+    let stateconnection = false;
+    const finduser =  await users.findOne({name:name})
+    console.log("finduser",finduser);
+    if(finduser){
+     console.log("finduser",finduser);  
      if(bcrypt.compareSync(password, finduser.password)){
-        var token = jwt.sign({ user:name, role:finduser.role}, 'shhhhh');
-        console.log("good password",token,"role",finduser.role);
-     }else{
+        var token = jwt.sign({ user:name, role:finduser.role}, process.env.JWT_SECRET);
+         stateconnection = true
+    }else{
+        stateconnection = false
         console.log("bad password");
      }
 
     }
-  return res.status(200).json({ message: "Connexion réussie", token:token,role:finduser.role });
+  return res.status(200).json({ message: "Connexion réussie", token:token,connection:stateconnection,role:finduser.role });
 }
 
 module.exports = {
